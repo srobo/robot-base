@@ -112,6 +112,7 @@ if __name__ == "__main__":
 
     print("SR Image Builder")
     print(f"Build directory: {args.build_dir}")
+    Path(args.build_dir).mkdir(parents=True, exist_ok=True)
 
     stages = determine_stage_list()
 
