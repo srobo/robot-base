@@ -41,9 +41,9 @@ if [[ "$OUTPUT_DEVICE" =~ ^/dev/loop ]]; then
   info "Setting up loop device"
 
   mkdir -p "$BUILD_DIR"
-  mount -o loop,offset=413696 "$IMAGE_OUTPUT_PATH" "$BUILD_DIR"
+  mount -t ext4 -o loop,offset=413696 "$IMAGE_OUTPUT_PATH" "$BUILD_DIR"
   mkdir -p "$BUILD_DIR/boot"
-  mount -o loop,offset=4096 "$IMAGE_OUTPUT_PATH" "$BUILD_DIR/boot"
+  mount -t vfat -o loop,offset=4096 "$IMAGE_OUTPUT_PATH" "$BUILD_DIR/boot"
 else
   boot_part="${OUTPUT_DEVICE}1"
   root_part="${OUTPUT_DEVICE}2"
