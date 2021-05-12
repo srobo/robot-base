@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 
 source ./util.sh
 
@@ -34,17 +35,27 @@ info "Partitioning disk image"
   echo        # last sector (accept default)
 
   echo w # write changes
-) | /sbin/fdisk "$IMAGE_OUTPUT_PATH" > /dev/null
+) | /sbin/fdisk "$IMAGE_OUTPUT_PATH" #> /dev/null
 
 if [[ "$OUTPUT_DEVICE" =~ ^/dev/loop ]]; then
   info "Setting up loop device"
-  losetup -P "$OUTPUT_DEVICE" "$IMAGE_OUTPUT_PATH"
-  boot_part="${OUTPUT_DEVICE}p1"
-  root_part="${OUTPUT_DEVICE}p2"
+
+  mkdir -p "$BUILD_DIR"
+  mount -t ext4 -o loop,offset=413696 "$IMAGE_OUTPUT_PATH" "$BUILD_DIR"
+  mkdir -p "$BUILD_DIR/boot"
+  mount -t vfat -o loop,offset=4096 "$IMAGE_OUTPUT_PATH" "$BUILD_DIR/boot"
 else
   boot_part="${OUTPUT_DEVICE}1"
   root_part="${OUTPUT_DEVICE}2"
 fi
+
+/sbin/fdisk -l "$IMAGE_OUTPUT_PATH"
+file "$IMAGE_OUTPUT_PATH"
+losetup
+file "$OUTPUT_DEVICE"
+file "$boot_part"
+file "$root_part"
+ls -lRa /dev/
 
 info "Creating boot filesystem"
 mkfs.vfat -F 32 "$boot_part"
@@ -52,7 +63,6 @@ mkfs.vfat -F 32 "$boot_part"
 info "Creating root filesystem"
 mkfs.ext4 -q "$root_part"
 
-mkdir -p "$BUILD_DIR"
 
 info "Mounting root partition"
 mount -t ext4 -o rw,defaults,noatime "$root_part" "$BUILD_DIR"

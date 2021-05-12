@@ -4,20 +4,28 @@ on:
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+      options: --privileged
+    strategy:
+      matrix:
+        platform: [odroid, rpi3, rpi4]
     steps:
       - uses: actions/checkout@v2
+      - run: echo -e "[aurto]\nSigLevel = Optional\nServer = https://aur.raccube.net/" >> /etc/pacman.conf
       - name: Install dependencies
-        run: sudo apt install -y libarchive-tools curl fdisk qemu-user-static zstd
+        run: pacman -Syu --noconfirm gptfdisk arch-install-scripts git qemu-user-static-bin archlinuxarm-keyring python dosfstools
       - name: Build ODroid image
-        run: sudo ./build.sh odroid.img
+        run: sudo ./build.py ${{ matrix.platform }} robot-${{ matrix.platform }}.img
       - name: Compress image
-        run: zstd odroid.img
+        run: zstd robot-${{ matrix.platform }}.img
       - name: Publish compressed image
         uses: actions/upload-artifact@v2
         with:
-          name: ODroid Image
-          path: odroid.img.zst
+          name: ${{ matrix.platform }}
+          path: robot-${{ matrix.platform }}.img.zst

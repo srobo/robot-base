@@ -17,7 +17,6 @@ Scripts used to create a system image for SR brain board SD cards.
 
 - bash
 - Python 3.8 or newer
-- curl
 - fdisk
 - [arch-install-scripts](https://archlinux.org/packages/extra/any/arch-install-scripts/)
 - [archlinuxarm-keyring](http://mirror.archlinuxarm.org/armv6h/core/archlinuxarm-keyring-20140119-1-any.pkg.tar.xz)
